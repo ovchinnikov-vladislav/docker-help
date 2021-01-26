@@ -2,7 +2,7 @@ version: '3'
 
 services:
   gitlab:
-    image: 'gitlab/gitlab-ee:latest'
+    image: 'gitlab/gitlab-ce:latest'
     restart: always
     hostname: 'localhost'
     environment:
@@ -15,5 +15,11 @@ services:
       - '22:22'
     volumes:
       - './files/config:/etc/gitlab'
-      - './files/logs:/var/log/gitlab'
-      - './files/data:/var/opt/gitlab'
+      - logs:/var/log/gitlab
+      - data:/var/opt/gitlab
+
+volumes:
+  logs:
+    external: false
+  data:
+    external: false
