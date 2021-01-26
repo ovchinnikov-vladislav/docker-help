@@ -1,0 +1,60 @@
+version: '3'
+
+services:
+  
+  jira_pgql:
+    image: postgres:9.5-alpine
+    environment:
+      - 'POSTGRES_USER=jira'
+      # изменить пароль
+      - 'POSTGRES_PASSWORD=admin'
+      - 'POSTGRES_DB=jiradb'
+      - 'POSTGRES_ENCODING=UNICODE'
+      - 'POSTGRES_COLLATE=C'
+      - 'POSTGRES_COLLATE_TYPE=C'
+    logging:
+      # limit logs retained on host to 25MB
+      driver: "json-file"
+      options:
+        max-size: "500k"
+        max-file: "50"
+    networks:
+      - jiranet
+    volumes:
+      - pgqldata:/var/lib/postgresql/data
+
+  jira:
+    image: teamatldocker/jira
+    environment:
+      - 'JIRA_DATABASE_URL=postgresql://jira@jira_pgql/jiradb'
+      # изменить пароль
+      - 'JIRA_DB_PASSWORD=admin'
+      - 'SETENV_JVM_MINIMUM_MEMORY=2048m'
+      - 'SETENV_JVM_MAXIMUM_MEMORY=4096m'
+      - 'JIRA_PROXY_NAME='
+      - 'JIRA_PROXY_PORT='
+      - 'JIRA_PROXY_SCHEME='
+    logging:
+      # limit logs retained on host to 25MB
+      driver: "json-file"
+      options:
+        max-size: "500k"
+        max-file: "50"
+    networks:
+      - jiranet
+    volumes:
+      - jiradata:/var/atlassian/jira
+    ports:
+      - '80:8080'
+    depends_on:
+      - jira_pgql
+
+volumes:
+  jiradata:
+    external: false
+  pgqldata:
+    external: false
+
+networks:
+  jiranet:
+    driver: bridge
