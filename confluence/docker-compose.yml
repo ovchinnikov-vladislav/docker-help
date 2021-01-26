@@ -1,0 +1,60 @@
+version: '3'
+
+services:
+  
+  confluence_pgql:
+    image: postgres:9.5-alpine
+    environment:
+      - 'POSTGRES_USER=confluence'
+      # изменить пароль
+      - 'POSTGRES_PASSWORD=admin'
+      - 'POSTGRES_DB=confluencedb'
+      - 'POSTGRES_ENCODING=UNICODE'
+      - 'POSTGRES_COLLATE=C'
+      - 'POSTGRES_COLLATE_TYPE=C'
+    logging:
+      # limit logs retained on host to 25MB
+      driver: "json-file"
+      options:
+        max-size: "500k"
+        max-file: "50"
+    networks:
+      - confluencenet
+    volumes:
+      - pgqldata:/var/lib/postgresql/data
+
+  confluence:
+    image: teamatldocker/confluence
+    environment:
+      - 'CONFLUENCE_DATABASE_URL=postgresql://confluence@confluence_pgql/confluencedb'
+      # изменить пароль
+      - 'CONFLUENCE_DB_PASSWORD=admin'
+      - 'SETENV_JVM_MINIMUM_MEMORY=2048m'
+      - 'SETENV_JVM_MAXIMUM_MEMORY=4096m'
+      - 'CONFLUENCE_PROXY_NAME='
+      - 'CONFLUENCE_PROXY_PORT='
+      - 'CONFLUENCE_PROXY_SCHEME='
+    logging:
+      # limit logs retained on host to 25MB
+      driver: "json-file"
+      options:
+        max-size: "500k"
+        max-file: "50"
+    networks:
+      - confluencenet
+    volumes:
+      - confluencedata:/var/atlassian/confluence
+    ports:
+      - '80:8090'
+    depends_on:
+      - confluence_pgql
+
+volumes:
+  confluencedata:
+    external: false
+  pgqldata:
+    external: false
+
+networks:
+  confluencenet:
+    driver: bridge
