@@ -14,6 +14,6 @@ services:
       - '443:443'
       - '22:22'
     volumes:
-      - '/files/config:/etc/gitlab'
-      - '/files/logs:/var/log/gitlab'
-      - '/files/data:/var/opt/gitlab'
+      - './files/config:/etc/gitlab'
+      - './files/logs:/var/log/gitlab'
+      - './files/data:/var/opt/gitlab'
