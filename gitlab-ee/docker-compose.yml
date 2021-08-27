@@ -4,22 +4,19 @@ services:
   gitlab:
     image: 'gitlab/gitlab-ee:latest'
     restart: always
-    hostname: 'localhost'
+    hostname: 'git.domain.example'
     environment:
       GITLAB_OMNIBUS_CONFIG: |
-        external_url 'http://localhost'
-        # Add any other gitlab.rb configuration here, each on its own line
+        external_url 'http://git.domain.example'
+        # Настройки reverse proxy как внешнего nginx
+        nginx['listen_port'] = 80
+        nginx['listen_https'] = false
+        letsencrypt['enable'] = false
     ports:
       - '80:80'
-      - '443:443'
-      - '22:22'
+      - '2222:22'
     volumes:
-      - './files/config:/etc/gitlab'
-      - logs:/var/log/gitlab
-      - data:/var/opt/gitlab
-
-volumes:
-  logs:
-    external: false
-  data:
-    external: false
+      - ./files/config:/etc/gitlab
+      - ./gitlab-data/logs:/var/log/gitlab
+      - ./gitlab-data/data:/var/opt/gitlab
+  
